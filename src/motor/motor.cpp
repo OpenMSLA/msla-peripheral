@@ -5,12 +5,7 @@
 hw_timer_t *timer = nullptr;
 ZMotor motor;
 
-void IRAM_ATTR stepperTimer() {
-    if (!motor.tick() && motor_finish_callback != nullptr) {
-        motor_finish_callback();
-        motor_finish_callback = nullptr;
-    }
-}
+void stepperTimer() { motor.tick(); }
 
 void initMotor() {
     timer = timerBegin(0, 80, true); // 80 МГц / 80 = 1 МГц

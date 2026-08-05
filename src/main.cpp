@@ -26,9 +26,6 @@ void loop() {
         // motor command
         case 50: {
             executeMotorTargetTask(cs.u.mt);
-            setMotorFinishTask([]() {
-                UARTSend(0x33); // 51 dec
-            });
             break;
         }
 

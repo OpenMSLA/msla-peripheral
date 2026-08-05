@@ -20,14 +20,16 @@ class PacketReader;
 MotorTargetTask parseMotorTargetTask(PacketReader *pr);
 void executeMotorTargetTask(MotorTargetTask mt);
 
-extern std::function<void()> motor_finish_callback;
-
-/// @brief Set callback, that will be called once, at motor stops
-void setMotorFinishTask(std::function<void()> callback);
-
 class ZMotor {
   public:
     bool is_homed = false;
+
+    /// @brief Last motor state
+    bool last_tick_run_state = false;
+
+    /// @brief When should the communication flow notify the orchestrator about
+    /// completion of movement
+    bool must_be_notified = false;
 
     ZMotor() {
         Serial2.begin(
@@ -39,7 +41,15 @@ class ZMotor {
         stepper.setRunMode(FOLLOW_POS);
     }
 
-    bool tick() { return stepper.tick(); }
+    bool tick() {
+        bool st = stepper.tick();
+        if (st && !last_tick_run_state) {
+            must_be_notified = true;
+        }
+
+        last_tick_run_state = st;
+        return st;
+    }
 
     void setAcceleration(uint16_t acc) { stepper.setAcceleration(acc); }
 
@@ -55,6 +65,8 @@ class ZMotor {
         driver.microsteps(ms);
         microsteps = ms;
     }
+
+    bool getState() { return stepper.getState(); }
 
   private:
     /// @brief Z-motor driver preferences

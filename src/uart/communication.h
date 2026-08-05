@@ -25,6 +25,26 @@ class PacketReader {
     uint32_t packetStartTime = 0;
     bool waitingPacket = false;
 
+    /// CRC8 gen
+    uint8_t crc8(uint8_t *data, size_t len) {
+        uint8_t crc = 0x00;
+        uint8_t poly = 0x07;
+
+        for (size_t i = 0; i < len; i++) {
+            crc ^= data[i];
+
+            for (uint8_t j = 0; j < 8; j++) {
+                if (crc & 0x80) {
+                    crc = (crc << 1) ^ poly;
+                } else {
+                    crc <<= 1;
+                }
+            }
+        }
+
+        return crc;
+    }
+
   public:
     /// @brief Parse buffer
     bool parse();

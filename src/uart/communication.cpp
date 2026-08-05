@@ -32,6 +32,12 @@ void communicationTask(void *pvParameters) {
         }
         xSemaphoreGive(uartMutex);
 
+        /// Notify the orchestrator when the motor has reached the target point
+        if (motor.must_be_notified) {
+            UARTSend(0x33); // 51 dec
+            motor.must_be_notified = false;
+        }
+
         PacketReader pr;
         while (pr.parse()) {
             u_int8_t cmd = pr.readUInt8();
@@ -98,19 +104,38 @@ bool PacketReader::parse() {
         waitingPacket = true;
     }
 
-    if (UART_BUFFER.size() < SYNC_LEN + 1)
+    short len_len = sizeof(uint16_t);
+    if (UART_BUFFER.size() < SYNC_LEN + len_len)
         return false;
 
-    uint8_t len = UART_BUFFER[SYNC_LEN];
-    size_t total = SYNC_LEN + 1 + len;
+    uint16_t len;
+    memcpy(&len, &UART_BUFFER[SYNC_LEN], len_len);
+
+    //                2          2      len   crc8
+    size_t total = SYNC_LEN + len_len + len + 1;
 
     if (UART_BUFFER.size() < total)
         return false;
 
     this->data.clear();
-    size_t pos = SYNC_LEN + 1;
-    while (pos < total) {
+    size_t pos = SYNC_LEN + len_len;
+    while (pos < total - 1) {
         this->data.push_back(UART_BUFFER[pos++]);
+    }
+
+    uint8_t crc;
+    memcpy(&crc, &UART_BUFFER[pos], 1);
+
+    if (crc8(data.data(), data.size()) != crc) {
+        this->data.clear();
+
+        // throw out only the first byte and look for the next SYNC
+        UART_BUFFER.erase(UART_BUFFER.begin());
+
+        packetStartTime = 0;
+        waitingPacket = false;
+
+        return false;
     }
 
     UART_BUFFER.erase(UART_BUFFER.begin(), UART_BUFFER.begin() + total);
