@@ -1,13 +1,14 @@
 #include "config.h"
+#include "motor/endstop.h"
 #include "motor/motor.h"
 #include "uart/communication.h"
 #include "uart/uart.h"
 #include <Arduino.h>
 
 void setup() {
-    Serial.begin(115200);
 
     startCommunication();
+    initEndstop();
     initMotor();
     initUV();
 }

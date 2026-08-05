@@ -9,7 +9,10 @@ const size_t SYNC_LEN = 2;
 
 SemaphoreHandle_t uartMutex = nullptr;
 
-void UARTBegin() { uartMutex = xSemaphoreCreateMutex(); }
+void UARTBegin() {
+    Serial.begin(115200);
+    uartMutex = xSemaphoreCreateMutex();
+}
 
 void UARTSend(uint8_t *data, size_t len) {
     xSemaphoreTake(uartMutex, portMAX_DELAY);

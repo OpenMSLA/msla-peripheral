@@ -33,9 +33,23 @@ void communicationTask(void *pvParameters) {
         xSemaphoreGive(uartMutex);
 
         /// Notify the orchestrator when the motor has reached the target point
-        if (motor.must_be_notified) {
-            UARTSend(0x33); // 51 dec
-            motor.must_be_notified = false;
+        /// or failed
+        if (motor.must_be_notified != NONE) {
+            PacketWriter pw;
+            pw.write((uint8_t)0x33); // 51 dec
+
+            switch (motor.must_be_notified) {
+            case SUCCESS:
+                pw.write((uint8_t)0x00);
+                break;
+
+            case Z_ENDSTOP_FAILED:
+                pw.write((uint8_t)0x01);
+                break;
+            }
+
+            motor.must_be_notified = NONE;
+            UARTSend(pw);
         }
 
         PacketReader pr;

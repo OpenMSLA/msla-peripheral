@@ -2,16 +2,29 @@
 #include "config.h"
 #include "uart/communication.h"
 
-hw_timer_t *timer = nullptr;
 ZMotor motor;
 
-void stepperTimer() { motor.tick(); }
+namespace {
+
+void motorTask(void *pvParameters) {
+    (void)pvParameters;
+
+    while (true) {
+        bool running = motor.tick();
+
+        if (running) {
+            taskYIELD();
+        } else {
+            vTaskDelay(pdMS_TO_TICKS(1));
+        }
+    }
+}
+
+} // namespace
 
 void initMotor() {
-    timer = timerBegin(0, 80, true); // 80 МГц / 80 = 1 МГц
-    timerAttachInterrupt(timer, &stepperTimer, true);
-    timerAlarmWrite(timer, 1000000.0 / STEPPER_MAX_SPEED, true);
-    timerAlarmEnable(timer);
+    xTaskCreatePinnedToCore(
+        motorTask, "MotorTask", 4096, nullptr, 3, nullptr, 1);
 }
 
 MotorTargetTask parseMotorTargetTask(PacketReader *pr) {
@@ -28,10 +41,4 @@ void executeMotorTargetTask(MotorTargetTask mt) {
     motor.setAcceleration(mt.accel);
     motor.setTarget(mt.pos);
     motor.setMaxSpeed(mt.speed);
-}
-
-std::function<void()> motor_finish_callback = nullptr;
-
-void setMotorFinishTask(std::function<void()> callback) {
-    motor_finish_callback = callback;
 }

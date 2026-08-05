@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config.h"
+#include "endstop.h"
 #include <Arduino.h>
 #include <GyverStepper.h>
 #include <TMCStepper.h>
@@ -20,16 +21,19 @@ class PacketReader;
 MotorTargetTask parseMotorTargetTask(PacketReader *pr);
 void executeMotorTargetTask(MotorTargetTask mt);
 
+enum CallbackNotificationType { SUCCESS, Z_ENDSTOP_FAILED, NONE };
+
 class ZMotor {
   public:
     bool is_homed = false;
+    bool is_homing = false;
 
     /// @brief Last motor state
     bool last_tick_run_state = false;
 
     /// @brief When should the communication flow notify the orchestrator about
     /// completion of movement
-    bool must_be_notified = false;
+    CallbackNotificationType must_be_notified = NONE;
 
     ZMotor() {
         Serial2.begin(
@@ -43,8 +47,14 @@ class ZMotor {
 
     bool tick() {
         bool st = stepper.tick();
-        if (st && !last_tick_run_state) {
-            must_be_notified = true;
+
+        if (st && end.triggered && !is_homing) {
+            brake();
+            must_be_notified = Z_ENDSTOP_FAILED;
+        } else if (!st && last_tick_run_state) {
+            if (must_be_notified == NONE) {
+                must_be_notified = SUCCESS;
+            }
         }
 
         last_tick_run_state = st;
@@ -53,7 +63,11 @@ class ZMotor {
 
     void setAcceleration(uint16_t acc) { stepper.setAcceleration(acc); }
 
-    void setTarget(int32_t target) { stepper.setTarget(target); }
+    void setTarget(int32_t target) {
+        if (target < 0)
+            target = 0;
+        stepper.setTarget(target);
+    }
 
     void setMaxSpeed(double speed) { stepper.setMaxSpeed(speed); }
 
@@ -67,6 +81,17 @@ class ZMotor {
     }
 
     bool getState() { return stepper.getState(); }
+
+    void brake() {
+        stepper.brake();
+        stepper.setCurrent(0);
+        stepper.setTarget(0);
+        end.triggered = false;
+        last_tick_run_state = false;
+        must_be_notified = NONE;
+        is_homing = false;
+        is_homed = false;
+    }
 
   private:
     /// @brief Z-motor driver preferences
