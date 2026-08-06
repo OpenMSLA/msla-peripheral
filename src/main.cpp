@@ -48,6 +48,6 @@ void loop() {
         }
         }
 
-        delay(5);
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
 }

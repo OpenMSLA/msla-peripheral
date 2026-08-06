@@ -4,8 +4,6 @@
 
 ZMotor motor;
 
-namespace {
-
 void motorTask(void *pvParameters) {
     (void)pvParameters;
 
@@ -19,8 +17,6 @@ void motorTask(void *pvParameters) {
         }
     }
 }
-
-} // namespace
 
 void initMotor() {
     xTaskCreatePinnedToCore(

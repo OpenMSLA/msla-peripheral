@@ -6,6 +6,8 @@ void initEndstop();
 class Endstop {
   public:
     volatile bool triggered = false;
+
+    bool manualUpdate();
 };
 
 extern Endstop end;

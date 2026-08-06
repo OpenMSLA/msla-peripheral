@@ -48,7 +48,12 @@ class ZMotor {
     bool tick() {
         bool st = stepper.tick();
 
-        if (st && end.triggered && !is_homing) {
+        // Ensure that endstop will be updated after release
+        if (end.triggered) {
+            end.manualUpdate();
+        }
+
+        if (st && end.triggered && !is_homing && stepper.dir == -1) {
             brake();
             must_be_notified = Z_ENDSTOP_FAILED;
         } else if (!st && last_tick_run_state) {
@@ -86,7 +91,7 @@ class ZMotor {
         stepper.brake();
         stepper.setCurrent(0);
         stepper.setTarget(0);
-        end.triggered = false;
+        end.manualUpdate();
         last_tick_run_state = false;
         must_be_notified = NONE;
         is_homing = false;
