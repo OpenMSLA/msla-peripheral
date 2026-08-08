@@ -7,6 +7,7 @@ class Endstop {
   public:
     volatile bool triggered = false;
 
+    /// Trigger manual update of endstop state
     bool manualUpdate();
 };
 

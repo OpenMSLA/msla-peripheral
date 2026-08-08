@@ -4,23 +4,19 @@
 
 ZMotor motor;
 
+/// @brief Infinity motor task
 void motorTask(void *pvParameters) {
     (void)pvParameters;
 
     while (true) {
-        bool running = motor.tick();
-
-        if (running) {
-            taskYIELD();
-        } else {
-            vTaskDelay(pdMS_TO_TICKS(1));
-        }
+        motor.tick();
+        taskYIELD();
     }
 }
 
 void initMotor() {
     xTaskCreatePinnedToCore(
-        motorTask, "MotorTask", 4096, nullptr, 3, nullptr, 1);
+        motorTask, "MotorTask", 4096, nullptr, 1, nullptr, 1);
 }
 
 MotorTargetTask parseMotorTargetTask(PacketReader *pr) {
