@@ -105,6 +105,8 @@ union CommunicationUnion {
 
     uint16_t current;    // 52
     uint16_t microsteps; // 54
+
+    // <HOME>            // 56
 };
 
 struct CommunicationStruct {

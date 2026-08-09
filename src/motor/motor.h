@@ -13,7 +13,6 @@ void initMotor();
 struct MotorTargetTask {
     int32_t pos;
     double speed;
-    u_int16_t accel;
 };
 
 class PacketReader;
@@ -21,7 +20,14 @@ class PacketReader;
 MotorTargetTask parseMotorTargetTask(PacketReader *pr);
 void executeMotorTargetTask(MotorTargetTask mt);
 
-enum CallbackNotificationType { SUCCESS, Z_ENDSTOP_FAILED, NONE };
+enum CallbackNotificationType {
+    SUCCESS,
+    Z_ENDSTOP_FAILED,
+    HOMED,
+    HOMING_FAILED,
+    NONE
+};
+enum HomingState { INIT_RAISING, RAISING, FAST_DOWN, SLOW_DOWN, HOMING_NONE };
 
 class ZMotor {
   public:
@@ -33,7 +39,9 @@ class ZMotor {
 
     /// @brief When should the communication flow notify the orchestrator about
     /// completion of movement
-    CallbackNotificationType must_be_notified = NONE;
+    CallbackNotificationType must_be_notified = CallbackNotificationType::NONE;
+
+    HomingState homing_state = HomingState::HOMING_NONE;
 
     ZMotor() {
         Serial2.begin(
@@ -43,6 +51,7 @@ class ZMotor {
         setCurrent(500);
         setMicrosteps(DEFAULT_STEPPER_MICROSTEP);
         stepper.setRunMode(FOLLOW_POS);
+        stepper.setAcceleration(Z_MOTOR_ACCEL);
     }
 
     bool tick() {
@@ -53,12 +62,17 @@ class ZMotor {
             end.manualUpdate();
         }
 
-        if (st && end.triggered && !is_homing && stepper.dir == -1) {
-            brake();
-            must_be_notified = Z_ENDSTOP_FAILED;
-        } else if (!st && last_tick_run_state) {
-            if (must_be_notified == NONE) {
-                must_be_notified = SUCCESS;
+        /// If motor is homing
+        if (is_homing) {
+            tickHome(st);
+        } else {
+            if (st && end.triggered && stepper.dir == -1) {
+                brake();
+                must_be_notified = CallbackNotificationType::Z_ENDSTOP_FAILED;
+            } else if (!st && last_tick_run_state) {
+                if (must_be_notified == CallbackNotificationType::NONE) {
+                    must_be_notified = CallbackNotificationType::SUCCESS;
+                }
             }
         }
 
@@ -71,7 +85,7 @@ class ZMotor {
     void setTarget(int32_t target) {
         if (target < 0)
             target = 0;
-        stepper.setTarget(target);
+        stepper.setTarget(MM_TO_STEPS(target));
     }
 
     void setMaxSpeed(double speed) { stepper.setMaxSpeed(speed); }
@@ -88,15 +102,74 @@ class ZMotor {
     bool getState() { return stepper.getState(); }
 
     void brake() {
-        stepper.brake();
-        stepper.setCurrent(0);
-        stepper.setTarget(0);
+        stepper.reset();
         end.manualUpdate();
         last_tick_run_state = false;
-        must_be_notified = NONE;
-        is_homing = false;
+        must_be_notified = CallbackNotificationType::NONE;
         is_homed = false;
     }
+
+    /// @brief Calling if motor is currently homing
+    void tickHome(bool is_running) {
+        switch (homing_state) {
+        case HomingState::HOMING_NONE:
+            stepper.setRunMode(FOLLOW_POS);
+            stepper.setMaxSpeed(MM_TO_STEPS(Z_MOTOR_PRIMARY_HOMING_SPEED));
+            stepper.setTarget(MM_TO_STEPS(Z_MOTOR_RISING_HEIGHT), RELATIVE);
+
+            homing_state = HomingState::INIT_RAISING;
+            break;
+
+        case HomingState::INIT_RAISING:
+            if (!is_running) {
+                vTaskDelay(pdMS_TO_TICKS(300));
+                stepper.setRunMode(KEEP_SPEED);
+                stepper.setSpeed(
+                    abs(MM_TO_STEPS(Z_MOTOR_PRIMARY_HOMING_SPEED)) * -1);
+
+                homing_state = HomingState::FAST_DOWN;
+            }
+            break;
+
+        case HomingState::FAST_DOWN:
+            if (end.triggered) {
+                stepper.brake();
+                stepper.setRunMode(FOLLOW_POS);
+                stepper.setMaxSpeed(MM_TO_STEPS(Z_MOTOR_PRIMARY_HOMING_SPEED));
+                stepper.setTarget(MM_TO_STEPS(Z_MOTOR_RISING_HEIGHT), RELATIVE);
+
+                homing_state = HomingState::RAISING;
+            }
+            break;
+
+        case HomingState::RAISING:
+            if (!is_running) {
+                vTaskDelay(pdMS_TO_TICKS(300));
+                stepper.setRunMode(KEEP_SPEED);
+                stepper.setSpeed(
+                    abs(MM_TO_STEPS(Z_MOTOR_SECONDARY_HOMING_SPEED)) * -1);
+
+                homing_state = HomingState::SLOW_DOWN;
+            }
+            break;
+
+        case HomingState::SLOW_DOWN:
+            if (end.triggered) {
+                stepper.brake();
+                stepper.setRunMode(FOLLOW_POS);
+                stepper.reset();
+
+                homing_state = HomingState::HOMING_NONE;
+                must_be_notified = HOMED;
+                is_homing = false;
+                is_homed = true;
+            }
+            break;
+        }
+    }
+
+    /// @brief Start homing Z axis
+    void home() { is_homing = true; }
 
   private:
     /// @brief Z-motor driver preferences

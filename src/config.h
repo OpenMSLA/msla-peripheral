@@ -23,6 +23,20 @@
 /// Total steps per revolution
 #define TOTAL_STEPPER_STEPS STEPPER_STEPS *DEFAULT_STEPPER_MICROSTEP
 
+/// Drive screw thread pitch (mm/rev)
+#define Z_MOTOR_LEADSCREW_STEP 8
+
+#define MM_TO_STEPS(x) (((x) * TOTAL_STEPPER_STEPS) / Z_MOTOR_LEADSCREW_STEP)
+
+/// Default Z-motor accel
+#define Z_MOTOR_ACCEL 5000
+/// Primary speed at which the motor will reach the limit switch (mm/s)
+#define Z_MOTOR_PRIMARY_HOMING_SPEED 10
+/// Speed ​​of precise aiming to the limit switch(mm/s)
+#define Z_MOTOR_SECONDARY_HOMING_SPEED 1
+/// The height to which the motor rises when homing (mm)
+#define Z_MOTOR_RISING_HEIGHT 5
+
 /// Value of the current-setting resistor on TMC2208
 /// Used to calculate current
 #define TMC2208_R_SENSE 0.11f

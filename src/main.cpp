@@ -6,7 +6,6 @@
 #include <Arduino.h>
 
 void setup() {
-
     startCommunication();
     initEndstop();
     initMotor();
@@ -44,6 +43,11 @@ void loop() {
         case 54: {
             motor.setMicrosteps(cs.u.microsteps);
             UARTSend(0x37); // 55 dec
+            break;
+        }
+
+        case 56: {
+            motor.home();
             break;
         }
         }

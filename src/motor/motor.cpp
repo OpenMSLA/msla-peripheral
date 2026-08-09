@@ -24,13 +24,11 @@ MotorTargetTask parseMotorTargetTask(PacketReader *pr) {
 
     mt.pos = pr->readInt32();
     mt.speed = pr->readDouble();
-    mt.accel = pr->readUInt16();
 
     return mt;
 }
 
 void executeMotorTargetTask(MotorTargetTask mt) {
-    motor.setAcceleration(mt.accel);
     motor.setTarget(mt.pos);
     motor.setMaxSpeed(mt.speed);
 }

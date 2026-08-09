@@ -34,21 +34,27 @@ void communicationTask(void *pvParameters) {
 
         /// Notify the orchestrator when the motor has reached the target point
         /// or failed
-        if (motor.must_be_notified != NONE) {
+        if (motor.must_be_notified != CallbackNotificationType::NONE) {
             PacketWriter pw;
-            pw.write((uint8_t)0x33); // 51 dec
 
             switch (motor.must_be_notified) {
             case SUCCESS:
+                pw.write((uint8_t)0x33); // 51 dec
                 pw.write((uint8_t)0x00);
                 break;
 
             case Z_ENDSTOP_FAILED:
+                pw.write((uint8_t)0x33); // 51 dec
                 pw.write((uint8_t)0x01);
+                break;
+
+            case HOMED:
+                pw.write((uint8_t)0x39); // 57 dec
+                pw.write((uint8_t)0x00);
                 break;
             }
 
-            motor.must_be_notified = NONE;
+            motor.must_be_notified = CallbackNotificationType::NONE;
             UARTSend(pw);
         }
 
@@ -71,6 +77,10 @@ void communicationTask(void *pvParameters) {
 
             case 54:
                 commStruct.u.microsteps = pr.readUInt16();
+                break;
+
+            case 56:
+                // <HOME>
                 break;
 
             default:
