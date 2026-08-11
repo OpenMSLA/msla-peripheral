@@ -27,8 +27,8 @@ void startCommunication() {
 void communicationTask(void *pvParameters) {
     while (1) {
         xSemaphoreTake(uartMutex, portMAX_DELAY);
-        while (Serial.available()) {
-            UART_BUFFER.push_back(Serial.read());
+        while (OrchestratorSerial.available()) {
+            UART_BUFFER.push_back(OrchestratorSerial.read());
         }
         xSemaphoreGive(uartMutex);
 

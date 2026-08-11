@@ -48,3 +48,17 @@
 /// Z-endstop configuration
 #define Z_ENDSTOP_PIN 27
 #define Z_ENDSTOP_INVERSE true
+
+/// Baud rate used for orchestrator connectivity
+#define ORCHESTRATOR_SERIAL_BAUD_RATE 115200
+
+/// Use hardware serial for orchestrator connectivity
+#define ORCHESTRATOR_HARDWARE_SERIAL
+
+#ifdef ORCHESTRATOR_HARDWARE_SERIAL
+/// Physical serial ID
+#define PHYSICAL_SERIAL 1
+
+#define ORCHESTRATOR_RX_PIN 26
+#define ORCHESTRATOR_TX_PIN 25
+#endif

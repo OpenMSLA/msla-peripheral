@@ -6,6 +6,8 @@
 #include <freertos/semphr.h>
 #include <vector>
 
+extern HardwareSerial OrchestratorSerial;
+
 /// @brief A sequence of sync bytes
 extern const uint8_t SYNC_BYTES[];
 extern const size_t SYNC_LEN;
