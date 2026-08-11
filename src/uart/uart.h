@@ -26,6 +26,8 @@ void UARTBegin();
 /// @param len payload len
 void UARTSend(uint8_t *data, size_t len);
 
+/// @brief Send one byte to a serial
 void UARTSend(uint8_t byte);
 
+/// @brief Send entire packet to a serial
 void UARTSend(PacketWriter byte);

@@ -7,7 +7,7 @@ void initUV() { pinMode(UV_RELAY_PIN, OUTPUT); }
 UVTask parseUVTask(PacketReader *pr) {
     UVTask uv;
 
-    uv.state = pr->readUInt8() == 1 ? true : false;
+    uv.state = pr->readUInt8() == 1;
     return uv;
 }
 
