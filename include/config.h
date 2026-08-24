@@ -5,6 +5,9 @@
 /// Number of steps per one revolution
 #define STEPPER_STEPS 200
 
+/// Default stepper current configuration (mA)
+#define DEFAULT_STEPPER_DRIVER_CURRENT 500
+
 /// Default stepper pins
 #define STEPPER_STEP_PIN 5
 #define STEPPER_DIR_PIN 18
@@ -18,7 +21,7 @@
 /// Used for calculating minimum period of timer interrupts
 #define STEPPER_MAX_SPEED 5000
 /// Default stepper microstep multiplier
-#define DEFAULT_STEPPER_MICROSTEP 16
+#define DEFAULT_STEPPER_MICROSTEP 256
 
 /// Total steps per revolution
 #define TOTAL_STEPPER_STEPS STEPPER_STEPS *DEFAULT_STEPPER_MICROSTEP
@@ -28,14 +31,14 @@
 
 #define MM_TO_STEPS(x) (((x) * TOTAL_STEPPER_STEPS) / Z_MOTOR_LEADSCREW_STEP)
 
-/// Default Z-motor accel
-#define Z_MOTOR_ACCEL 5000
-/// Primary speed at which the motor will reach the limit switch (mm/s)
-#define Z_MOTOR_PRIMARY_HOMING_SPEED 10
-/// Speed ​​of precise aiming to the limit switch(mm/s)
-#define Z_MOTOR_SECONDARY_HOMING_SPEED 1
+/// Default Z-motor accel (mm/s2)
+#define Z_MOTOR_ACCEL 10
+/// Primary speed at which the motor will reach the limit switch (mm/min)
+#define Z_MOTOR_PRIMARY_HOMING_SPEED 200
+/// Speed ​​of precise aiming to the limit switch(mm/min)
+#define Z_MOTOR_SECONDARY_HOMING_SPEED 60
 /// The height to which the motor rises when homing (mm)
-#define Z_MOTOR_RISING_HEIGHT 5
+#define Z_MOTOR_RISING_HEIGHT 3
 
 /// Value of the current-setting resistor on TMC2208
 /// Used to calculate current
@@ -47,13 +50,14 @@
 
 /// Z-endstop configuration
 #define Z_ENDSTOP_PIN 27
+#define Z_ENDSTOP_POWER_PIN 21
 #define Z_ENDSTOP_INVERSE true
 
 /// Baud rate used for orchestrator connectivity
 #define ORCHESTRATOR_SERIAL_BAUD_RATE 115200
 
 /// Use hardware serial for orchestrator connectivity
-#define ORCHESTRATOR_HARDWARE_SERIAL
+// #define ORCHESTRATOR_HARDWARE_SERIAL
 
 #ifdef ORCHESTRATOR_HARDWARE_SERIAL
 /// Physical serial ID

@@ -11,7 +11,7 @@ void initMotor();
 
 /// @brief Struct, representing a next motor target
 struct MotorTargetTask {
-    int32_t pos;
+    double pos;
     double speed;
 };
 
@@ -20,18 +20,11 @@ class PacketReader;
 MotorTargetTask parseMotorTargetTask(PacketReader *pr);
 void executeMotorTargetTask(MotorTargetTask mt);
 
-enum CallbackNotificationType {
-    SUCCESS,
-    Z_ENDSTOP_FAILED,
-    HOMED,
-    HOMING_FAILED,
-    NONE
-};
+enum CallbackNotificationType { SUCCESS, HOMED, HOMING_FAILED, NONE };
 enum HomingState { INIT_RAISING, RAISING, FAST_DOWN, SLOW_DOWN, HOMING_NONE };
 
 class ZMotor {
   public:
-    bool is_homed = false;
     bool is_homing = false;
 
     /// @brief Last motor state
@@ -52,10 +45,13 @@ class ZMotor {
     void setAcceleration(uint16_t acc);
 
     /// @brief Set motor target
-    void setTarget(int32_t target);
+    void setTarget(double target);
 
     /// @brief Set motor max speed
     void setMaxSpeed(double speed);
+
+    /// @brief Set motor speed
+    void setSpeed(double speed);
 
     /// @brief Set driver current
     void setCurrent(uint16_t curr);
@@ -74,6 +70,12 @@ class ZMotor {
 
     /// @brief Start homing Z axis
     void home();
+
+    /// @brief Disable stepper
+    void disable();
+
+    /// @brief Enable stepper
+    void enable();
 
   private:
     /// @brief Z-motor driver preferences

@@ -43,11 +43,6 @@ void communicationTask(void *pvParameters) {
                 pw.write((uint8_t)0x00);
                 break;
 
-            case Z_ENDSTOP_FAILED:
-                pw.write((uint8_t)0x33); // 51 dec
-                pw.write((uint8_t)0x01);
-                break;
-
             case HOMED:
                 pw.write((uint8_t)0x39); // 57 dec
                 pw.write((uint8_t)0x00);
@@ -83,6 +78,13 @@ void communicationTask(void *pvParameters) {
                 // <HOME>
                 break;
 
+            case 58:
+                // <DISABLE STEPPER>
+                break;
+
+            case 60:
+                // <ENABLE STEPPER>
+                break;
             default:
                 continue;
             }

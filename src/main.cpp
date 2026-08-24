@@ -50,6 +50,16 @@ void loop() {
             motor.home();
             break;
         }
+
+        case 58:
+            motor.disable();
+            UARTSend(0x38); // 59 dec
+            break;
+
+        case 60:
+            motor.enable();
+            UARTSend(0x3D); // 61 dec
+            break;
         }
     }
 

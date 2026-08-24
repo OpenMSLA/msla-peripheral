@@ -6,10 +6,12 @@ ZMotor::ZMotor() {
     Serial2.begin(115200, SERIAL_8N1, STEPPER_UART_RX_PIN, STEPPER_UART_TX_PIN);
 
     driver.begin();
-    setCurrent(500);
+    setCurrent(DEFAULT_STEPPER_DRIVER_CURRENT);
     setMicrosteps(DEFAULT_STEPPER_MICROSTEP);
     stepper.setRunMode(FOLLOW_POS);
-    stepper.setAcceleration(Z_MOTOR_ACCEL);
+    stepper.setAcceleration(MM_TO_STEPS(Z_MOTOR_ACCEL));
+
+    driver.TPWMTHRS(10);
 }
 
 bool ZMotor::tick() {
@@ -20,18 +22,13 @@ bool ZMotor::tick() {
         end.manualUpdate();
     }
 
+    bool is_down = stepper.getTarget() - stepper.getCurrent() < 0;
+
     /// If motor is homing
     if (is_homing) {
         tickHome(st);
-    } else {
-        if (st && end.triggered && stepper.dir == -1) {
-            brake();
-            must_be_notified = CallbackNotificationType::Z_ENDSTOP_FAILED;
-        } else if (!st && last_tick_run_state) {
-            if (must_be_notified == CallbackNotificationType::NONE) {
-                must_be_notified = CallbackNotificationType::SUCCESS;
-            }
-        }
+    } else if (!st && last_tick_run_state) {
+        must_be_notified = CallbackNotificationType::SUCCESS;
     }
 
     last_tick_run_state = st;
@@ -40,13 +37,17 @@ bool ZMotor::tick() {
 
 void ZMotor::setAcceleration(uint16_t acc) { stepper.setAcceleration(acc); }
 
-void ZMotor::setTarget(int32_t target) {
-    if (target < 0)
-        target = 0;
+void ZMotor::setTarget(double target) {
     stepper.setTarget(MM_TO_STEPS(target));
 }
 
-void ZMotor::setMaxSpeed(double speed) { stepper.setMaxSpeed(speed); }
+void ZMotor::setMaxSpeed(double speed) {
+    stepper.setMaxSpeed(MM_TO_STEPS(speed) / 60);
+}
+
+void ZMotor::setSpeed(double speed) {
+    stepper.setSpeed(MM_TO_STEPS(speed) / 60);
+}
 
 void ZMotor::setCurrent(uint16_t curr) { driver.rms_current(curr); }
 
@@ -64,7 +65,6 @@ void ZMotor::brake() {
     end.manualUpdate();
     last_tick_run_state = false;
     must_be_notified = CallbackNotificationType::NONE;
-    is_homed = false;
 }
 
 /// @brief Calling if motor is currently homing
@@ -82,8 +82,7 @@ void ZMotor::tickHome(bool is_running) {
         if (!is_running) {
             vTaskDelay(pdMS_TO_TICKS(300));
             stepper.setRunMode(KEEP_SPEED);
-            stepper.setSpeed(
-                abs(MM_TO_STEPS(Z_MOTOR_PRIMARY_HOMING_SPEED)) * -1);
+            motor.setSpeed(abs(Z_MOTOR_PRIMARY_HOMING_SPEED) * -1);
 
             homing_state = HomingState::FAST_DOWN;
         }
@@ -93,7 +92,7 @@ void ZMotor::tickHome(bool is_running) {
         if (end.triggered) {
             stepper.brake();
             stepper.setRunMode(FOLLOW_POS);
-            stepper.setMaxSpeed(MM_TO_STEPS(Z_MOTOR_PRIMARY_HOMING_SPEED));
+            motor.setMaxSpeed(Z_MOTOR_PRIMARY_HOMING_SPEED);
             stepper.setTarget(MM_TO_STEPS(Z_MOTOR_RISING_HEIGHT), RELATIVE);
 
             homing_state = HomingState::RAISING;
@@ -104,8 +103,7 @@ void ZMotor::tickHome(bool is_running) {
         if (!is_running) {
             vTaskDelay(pdMS_TO_TICKS(300));
             stepper.setRunMode(KEEP_SPEED);
-            stepper.setSpeed(
-                abs(MM_TO_STEPS(Z_MOTOR_SECONDARY_HOMING_SPEED)) * -1);
+            motor.setSpeed(abs(Z_MOTOR_SECONDARY_HOMING_SPEED) * -1);
 
             homing_state = HomingState::SLOW_DOWN;
         }
@@ -120,7 +118,6 @@ void ZMotor::tickHome(bool is_running) {
             homing_state = HomingState::HOMING_NONE;
             must_be_notified = HOMED;
             is_homing = false;
-            is_homed = true;
         }
         break;
     }
@@ -128,6 +125,12 @@ void ZMotor::tickHome(bool is_running) {
 
 /// @brief Start homing Z axis
 void ZMotor::home() { is_homing = true; }
+
+void ZMotor::disable() { stepper.disable(); }
+
+void ZMotor::enable() { stepper.enable(); }
+
+////////////////////////////////////////////////////////////////////////////////////////////
 
 ZMotor motor;
 
@@ -149,13 +152,14 @@ void initMotor() {
 MotorTargetTask parseMotorTargetTask(PacketReader *pr) {
     MotorTargetTask mt;
 
-    mt.pos = pr->readInt32();
+    mt.pos = pr->readDouble();
     mt.speed = pr->readDouble();
 
     return mt;
 }
 
 void executeMotorTargetTask(MotorTargetTask mt) {
+    motor.enable();
     motor.setTarget(mt.pos);
     motor.setMaxSpeed(mt.speed);
 }

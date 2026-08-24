@@ -12,7 +12,7 @@ SemaphoreHandle_t uartMutex = nullptr;
 #ifdef ORCHESTRATOR_HARDWARE_SERIAL
 HardwareSerial OrchestratorSerial(PHYSICAL_SERIAL);
 #else
-HardwareSerial &OrchestratorSerial = Serial;
+HardwareSerial OrchestratorSerial = Serial;
 #endif
 
 void UARTBegin() {
