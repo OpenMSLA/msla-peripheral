@@ -18,6 +18,10 @@ extern std::vector<uint8_t> UART_BUFFER;
 /// @brief UART mutex
 extern SemaphoreHandle_t uartMutex;
 
+/// @brief Gen crc8
+/// @return
+uint8_t crc8(uint8_t *data, size_t len);
+
 /// @brief Config UART
 void UARTBegin();
 

@@ -28,7 +28,9 @@ bool ZMotor::tick() {
     if (is_homing) {
         tickHome(st);
     } else if (!st && last_tick_run_state) {
-        must_be_notified = CallbackNotificationType::SUCCESS;
+        if (must_be_notified == CallbackNotificationType::NONE) {
+            must_be_notified = CallbackNotificationType::SUCCESS;
+        }
     }
 
     last_tick_run_state = st;
