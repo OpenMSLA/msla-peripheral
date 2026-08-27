@@ -47,7 +47,7 @@ void loop() {
 
         case 58:
             motor.disable();
-            UARTSend(0x38); // 59 dec
+            UARTSend(0x3B); // 59 dec
             break;
 
         case 60:

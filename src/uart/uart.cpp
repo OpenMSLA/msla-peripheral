@@ -19,6 +19,8 @@ void UARTBegin() {
 #ifdef ORCHESTRATOR_HARDWARE_SERIAL
     OrchestratorSerial.begin(ORCHESTRATOR_SERIAL_BAUD_RATE, SERIAL_8N1,
         ORCHESTRATOR_RX_PIN, ORCHESTRATOR_TX_PIN);
+
+    Serial.begin(115200);
 #else
     OrchestratorSerial.begin(ORCHESTRATOR_SERIAL_BAUD_RATE);
 #endif
