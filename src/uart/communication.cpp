@@ -28,7 +28,6 @@ void communicationTask(void *pvParameters) {
     while (1) {
         xSemaphoreTake(uartMutex, portMAX_DELAY);
         while (OrchestratorSerial.available()) {
-            Serial.println("aaa");
             UART_BUFFER.push_back(OrchestratorSerial.read());
         }
         xSemaphoreGive(uartMutex);
@@ -57,7 +56,6 @@ void communicationTask(void *pvParameters) {
         PacketReader pr;
         while (pr.parse()) {
             u_int8_t cmd = pr.readUInt8();
-            Serial.println(cmd);
 
             CommunicationStruct commStruct;
             switch (cmd) {
