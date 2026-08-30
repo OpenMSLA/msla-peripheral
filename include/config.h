@@ -30,6 +30,7 @@
 #define Z_MOTOR_LEADSCREW_STEP 8
 
 #define MM_TO_STEPS(x) (((x) * TOTAL_STEPPER_STEPS) / Z_MOTOR_LEADSCREW_STEP)
+#define STEPS_TO_MM(x) (((x) * Z_MOTOR_LEADSCREW_STEP) / TOTAL_STEPPER_STEPS)
 
 /// Default Z-motor accel (mm/s2)
 #define Z_MOTOR_ACCEL 10
@@ -52,6 +53,9 @@
 #define Z_ENDSTOP_PIN 27
 #define Z_ENDSTOP_POWER_PIN 21
 #define Z_ENDSTOP_INVERSE true
+
+/// z-dimension of printing space (mm)
+#define Z_HEIGHT 185
 
 /// Baud rate used for orchestrator connectivity
 #define ORCHESTRATOR_SERIAL_BAUD_RATE 115200

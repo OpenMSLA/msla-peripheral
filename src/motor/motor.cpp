@@ -40,6 +40,24 @@ bool ZMotor::tick() {
 void ZMotor::setAcceleration(uint16_t acc) { stepper.setAcceleration(acc); }
 
 void ZMotor::setTarget(double target) {
+    stepper.setTarget(MM_TO_STEPS(fmin(target, Z_HEIGHT)));
+}
+
+void ZMotor::setTarget(double target, GS_posType pos) {
+    switch (pos) {
+    case GS_posType::ABSOLUTE:
+        target = fmin(target, Z_HEIGHT);
+        break;
+
+    case GS_posType::RELATIVE:
+        double max_target = MM_TO_STEPS(Z_HEIGHT) - this->stepper.pos;
+
+        if (MM_TO_STEPS(target) > max_target) {
+            target = STEPS_TO_MM(max_target);
+        }
+        break;
+    }
+
     stepper.setTarget(MM_TO_STEPS(target));
 }
 
@@ -74,8 +92,8 @@ void ZMotor::tickHome(bool is_running) {
     switch (homing_state) {
     case HomingState::HOMING_NONE:
         stepper.setRunMode(FOLLOW_POS);
-        stepper.setMaxSpeed(MM_TO_STEPS(Z_MOTOR_PRIMARY_HOMING_SPEED));
-        stepper.setTarget(MM_TO_STEPS(Z_MOTOR_RISING_HEIGHT), RELATIVE);
+        motor.setMaxSpeed(MM_TO_STEPS(Z_MOTOR_PRIMARY_HOMING_SPEED));
+        motor.setTarget(MM_TO_STEPS(Z_MOTOR_RISING_HEIGHT), RELATIVE);
 
         homing_state = HomingState::INIT_RAISING;
         break;
@@ -95,7 +113,7 @@ void ZMotor::tickHome(bool is_running) {
             stepper.brake();
             stepper.setRunMode(FOLLOW_POS);
             motor.setMaxSpeed(Z_MOTOR_PRIMARY_HOMING_SPEED);
-            stepper.setTarget(MM_TO_STEPS(Z_MOTOR_RISING_HEIGHT), RELATIVE);
+            motor.setTarget(MM_TO_STEPS(Z_MOTOR_RISING_HEIGHT), RELATIVE);
 
             homing_state = HomingState::RAISING;
         }
@@ -156,12 +174,21 @@ MotorTargetTask parseMotorTargetTask(PacketReader *pr) {
 
     mt.pos = pr->readDouble();
     mt.speed = pr->readDouble();
+    switch (pr->readUInt8()) {
+    case 0:
+        mt.positioning = GS_posType::ABSOLUTE;
+        break;
+
+    case 1:
+        mt.positioning = GS_posType::RELATIVE;
+        break;
+    }
 
     return mt;
 }
 
 void executeMotorTargetTask(MotorTargetTask mt) {
     motor.enable();
-    motor.setTarget(mt.pos);
+    motor.setTarget(mt.pos, mt.positioning);
     motor.setMaxSpeed(mt.speed);
 }

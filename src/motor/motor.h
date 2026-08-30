@@ -13,6 +13,7 @@ void initMotor();
 struct MotorTargetTask {
     double pos;
     double speed;
+    GS_posType positioning;
 };
 
 class PacketReader;
@@ -46,6 +47,9 @@ class ZMotor {
 
     /// @brief Set motor target
     void setTarget(double target);
+
+    /// @brief Set target with positioning type
+    void setTarget(double target, GS_posType pos);
 
     /// @brief Set motor max speed
     void setMaxSpeed(double speed);
