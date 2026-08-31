@@ -61,7 +61,7 @@
 #define ORCHESTRATOR_SERIAL_BAUD_RATE 115200
 
 /// Use hardware serial for orchestrator connectivity
-#define ORCHESTRATOR_HARDWARE_SERIAL
+// #define ORCHESTRATOR_HARDWARE_SERIAL
 
 #ifdef ORCHESTRATOR_HARDWARE_SERIAL
 /// Physical serial ID

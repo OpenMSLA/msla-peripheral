@@ -50,10 +50,10 @@ void ZMotor::setTarget(double target, GS_posType pos) {
         break;
 
     case GS_posType::RELATIVE:
-        double max_target = MM_TO_STEPS(Z_HEIGHT) - this->stepper.pos;
+        double max_target = Z_HEIGHT - STEPS_TO_MM(this->stepper.pos);
 
-        if (MM_TO_STEPS(target) > max_target) {
-            target = STEPS_TO_MM(max_target);
+        if (target > max_target) {
+            target = max_target;
         }
         break;
     }
@@ -92,8 +92,8 @@ void ZMotor::tickHome(bool is_running) {
     switch (homing_state) {
     case HomingState::HOMING_NONE:
         stepper.setRunMode(FOLLOW_POS);
-        motor.setMaxSpeed(MM_TO_STEPS(Z_MOTOR_PRIMARY_HOMING_SPEED));
-        motor.setTarget(MM_TO_STEPS(Z_MOTOR_RISING_HEIGHT), RELATIVE);
+        motor.setMaxSpeed(Z_MOTOR_PRIMARY_HOMING_SPEED);
+        motor.setTarget(Z_MOTOR_RISING_HEIGHT, RELATIVE);
 
         homing_state = HomingState::INIT_RAISING;
         break;
@@ -113,7 +113,7 @@ void ZMotor::tickHome(bool is_running) {
             stepper.brake();
             stepper.setRunMode(FOLLOW_POS);
             motor.setMaxSpeed(Z_MOTOR_PRIMARY_HOMING_SPEED);
-            motor.setTarget(MM_TO_STEPS(Z_MOTOR_RISING_HEIGHT), RELATIVE);
+            motor.setTarget(Z_MOTOR_RISING_HEIGHT, RELATIVE);
 
             homing_state = HomingState::RAISING;
         }
@@ -189,6 +189,7 @@ MotorTargetTask parseMotorTargetTask(PacketReader *pr) {
 
 void executeMotorTargetTask(MotorTargetTask mt) {
     motor.enable();
+    motor.is_homing = false;
     motor.setTarget(mt.pos, mt.positioning);
     motor.setMaxSpeed(mt.speed);
 }

@@ -45,7 +45,7 @@ class ZMotor {
     /// @brief Set motor accel
     void setAcceleration(uint16_t acc);
 
-    /// @brief Set motor target
+    /// @brief Set motor target (mm)
     void setTarget(double target);
 
     /// @brief Set target with positioning type
