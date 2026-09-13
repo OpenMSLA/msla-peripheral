@@ -50,21 +50,25 @@ void ZMotor::setTarget(double target, GS_posType pos) {
         break;
 
     case GS_posType::RELATIVE:
+        /*
         double max_target = Z_HEIGHT - STEPS_TO_MM(this->stepper.pos);
 
         if (target > max_target) {
             target = max_target;
         }
+            */
         break;
     }
 
-    stepper.setTarget(MM_TO_STEPS(target));
+    stepper.setTarget(MM_TO_STEPS(target), pos);
 }
 
+/// @brief Set max speed in mm/min
 void ZMotor::setMaxSpeed(double speed) {
     stepper.setMaxSpeed(MM_TO_STEPS(speed) / 60);
 }
 
+/// @brief Set speed in mm/min
 void ZMotor::setSpeed(double speed) {
     stepper.setSpeed(MM_TO_STEPS(speed) / 60);
 }

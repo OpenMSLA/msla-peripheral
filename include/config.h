@@ -35,7 +35,7 @@
 /// Default Z-motor accel (mm/s2)
 #define Z_MOTOR_ACCEL 10
 /// Primary speed at which the motor will reach the limit switch (mm/min)
-#define Z_MOTOR_PRIMARY_HOMING_SPEED 200
+#define Z_MOTOR_PRIMARY_HOMING_SPEED 150
 /// Speed ​​of precise aiming to the limit switch(mm/min)
 #define Z_MOTOR_SECONDARY_HOMING_SPEED 60
 /// The height to which the motor rises when homing (mm)
@@ -61,7 +61,7 @@
 #define ORCHESTRATOR_SERIAL_BAUD_RATE 115200
 
 /// Use hardware serial for orchestrator connectivity
-// #define ORCHESTRATOR_HARDWARE_SERIAL
+#define ORCHESTRATOR_HARDWARE_SERIAL
 
 #ifdef ORCHESTRATOR_HARDWARE_SERIAL
 /// Physical serial ID
