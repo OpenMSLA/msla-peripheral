@@ -2,6 +2,8 @@
 
 #include "config.h"
 #include "endstop.h"
+#include "uart/packet.h"
+
 #include <Arduino.h>
 #include <GyverStepper.h>
 #include <TMCStepper.h>
@@ -16,16 +18,14 @@ struct MotorTargetTask {
     GS_posType positioning;
 };
 
-class PacketReader;
-
-MotorTargetTask parseMotorTargetTask(PacketReader *pr);
+MotorTargetTask parseMotorTargetTask(PacketReader* pr);
 void executeMotorTargetTask(MotorTargetTask mt);
 
 enum CallbackNotificationType { SUCCESS, HOMED, HOMING_FAILED, NONE };
 enum HomingState { INIT_RAISING, RAISING, FAST_DOWN, SLOW_DOWN, HOMING_NONE };
 
 class ZMotor {
-  public:
+public:
     bool is_homing = false;
 
     /// @brief Last motor state
@@ -81,13 +81,13 @@ class ZMotor {
     /// @brief Enable stepper
     void enable();
 
-  private:
+private:
     /// @brief Z-motor driver preferences
     TMC2208Stepper driver{&Serial2, TMC2208_R_SENSE};
 
     /// @brief Z-motor
-    GStepper<STEPPER2WIRE> stepper{
-        TOTAL_STEPPER_STEPS, STEPPER_STEP_PIN, STEPPER_DIR_PIN, STEPPER_EN_PIN};
+    GStepper<STEPPER2WIRE> stepper{TOTAL_STEPPER_STEPS, STEPPER_STEP_PIN, STEPPER_DIR_PIN,
+                                   STEPPER_EN_PIN};
 
     uint16_t microsteps = DEFAULT_STEPPER_MICROSTEP;
 

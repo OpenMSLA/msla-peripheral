@@ -1,5 +1,7 @@
 #include "uart.h"
+
 #include "config.h"
+
 #include <vector>
 
 std::vector<uint8_t> UART_BUFFER;
@@ -17,8 +19,8 @@ HardwareSerial OrchestratorSerial = Serial;
 
 void UARTBegin() {
 #ifdef ORCHESTRATOR_HARDWARE_SERIAL
-    OrchestratorSerial.begin(ORCHESTRATOR_SERIAL_BAUD_RATE, SERIAL_8N1,
-        ORCHESTRATOR_RX_PIN, ORCHESTRATOR_TX_PIN);
+    OrchestratorSerial.begin(ORCHESTRATOR_SERIAL_BAUD_RATE, SERIAL_8N1, ORCHESTRATOR_RX_PIN,
+                             ORCHESTRATOR_TX_PIN);
 
     Serial.begin(115200);
 #else
@@ -27,7 +29,7 @@ void UARTBegin() {
     uartMutex = xSemaphoreCreateMutex();
 }
 
-uint8_t crc8(uint8_t *data, size_t len) {
+uint8_t crc8(uint8_t* data, size_t len) {
     uint8_t crc = 0x00;
     uint8_t poly = 0x07;
 
@@ -46,11 +48,11 @@ uint8_t crc8(uint8_t *data, size_t len) {
     return crc;
 }
 
-void UARTSend(uint8_t *data, size_t len) {
+void UARTSend(uint8_t* data, size_t len) {
     xSemaphoreTake(uartMutex, portMAX_DELAY);
 
     OrchestratorSerial.write(SYNC_BYTES, SYNC_LEN);
-    OrchestratorSerial.write((uint8_t *)&len, sizeof(uint16_t));
+    OrchestratorSerial.write((uint8_t*)&len, sizeof(uint16_t));
     OrchestratorSerial.write(data, len);
 
     uint8_t crc = crc8(data, len);
@@ -59,7 +61,9 @@ void UARTSend(uint8_t *data, size_t len) {
     xSemaphoreGive(uartMutex);
 }
 
-void UARTSend(uint8_t byte) { UARTSend(&byte, 1); }
+void UARTSend(uint8_t byte) {
+    UARTSend(&byte, 1);
+}
 
 void UARTSend(PacketWriter packet) {
     std::vector<uint8_t> pack = packet.getPacket();

@@ -4,7 +4,7 @@
 void initEndstop();
 
 class Endstop {
-  public:
+public:
     volatile bool triggered = false;
 
     /// Trigger manual update of endstop state

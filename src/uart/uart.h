@@ -1,6 +1,8 @@
 #pragma once
 
 #include "communication.h"
+#include "packet.h"
+
 #include <Arduino.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -20,7 +22,7 @@ extern SemaphoreHandle_t uartMutex;
 
 /// @brief Gen crc8
 /// @return
-uint8_t crc8(uint8_t *data, size_t len);
+uint8_t crc8(uint8_t* data, size_t len);
 
 /// @brief Config UART
 void UARTBegin();
@@ -28,7 +30,7 @@ void UARTBegin();
 /// @brief Send data to a serial
 /// @param data payload
 /// @param len payload len
-void UARTSend(uint8_t *data, size_t len);
+void UARTSend(uint8_t* data, size_t len);
 
 /// @brief Send one byte to a serial
 void UARTSend(uint8_t byte);

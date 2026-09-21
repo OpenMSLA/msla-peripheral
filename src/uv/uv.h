@@ -1,15 +1,15 @@
 #pragma once
 
-#include <Arduino.h>
+#include "uart/packet.h"
 
-class PacketReader;
+#include <Arduino.h>
 
 struct UVTask {
     bool state;
 };
 
 /// @brief Parse packet reader to a uv task
-UVTask parseUVTask(PacketReader *pr);
+UVTask parseUVTask(PacketReader* pr);
 
 /// @brief Execute uv task in hw
 void executeUVTask(UVTask uv);

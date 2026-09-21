@@ -1,4 +1,5 @@
 #include "motor.h"
+
 #include "config.h"
 #include "uart/communication.h"
 
@@ -37,7 +38,9 @@ bool ZMotor::tick() {
     return st;
 }
 
-void ZMotor::setAcceleration(uint16_t acc) { stepper.setAcceleration(acc); }
+void ZMotor::setAcceleration(uint16_t acc) {
+    stepper.setAcceleration(acc);
+}
 
 void ZMotor::setTarget(double target) {
     stepper.setTarget(MM_TO_STEPS(fmin(target, Z_HEIGHT)));
@@ -45,19 +48,19 @@ void ZMotor::setTarget(double target) {
 
 void ZMotor::setTarget(double target, GS_posType pos) {
     switch (pos) {
-    case GS_posType::ABSOLUTE:
-        target = fmin(target, Z_HEIGHT);
-        break;
+        case GS_posType::ABSOLUTE:
+            target = fmin(target, Z_HEIGHT);
+            break;
 
-    case GS_posType::RELATIVE:
-        /*
-        double max_target = Z_HEIGHT - STEPS_TO_MM(this->stepper.pos);
+        case GS_posType::RELATIVE:
+            /*
+            double max_target = Z_HEIGHT - STEPS_TO_MM(this->stepper.pos);
 
-        if (target > max_target) {
-            target = max_target;
-        }
+            if (target > max_target) {
+                target = max_target;
+            }
             */
-        break;
+            break;
     }
 
     stepper.setTarget(MM_TO_STEPS(target), pos);
@@ -73,16 +76,22 @@ void ZMotor::setSpeed(double speed) {
     stepper.setSpeed(MM_TO_STEPS(speed) / 60);
 }
 
-void ZMotor::setCurrent(uint16_t curr) { driver.rms_current(curr); }
+void ZMotor::setCurrent(uint16_t curr) {
+    driver.rms_current(curr);
+}
 
-uint16_t ZMotor::getCurrent() { return driver.rms_current(); }
+uint16_t ZMotor::getCurrent() {
+    return driver.rms_current();
+}
 
 void ZMotor::setMicrosteps(uint16_t ms) {
     driver.microsteps(ms);
     microsteps = ms;
 }
 
-bool ZMotor::getState() { return stepper.getState(); }
+bool ZMotor::getState() {
+    return stepper.getState();
+}
 
 void ZMotor::brake() {
     stepper.reset();
@@ -94,72 +103,78 @@ void ZMotor::brake() {
 /// @brief Calling if motor is currently homing
 void ZMotor::tickHome(bool is_running) {
     switch (homing_state) {
-    case HomingState::HOMING_NONE:
-        stepper.setRunMode(FOLLOW_POS);
-        motor.setMaxSpeed(Z_MOTOR_PRIMARY_HOMING_SPEED);
-        motor.setTarget(Z_MOTOR_RISING_HEIGHT, RELATIVE);
-
-        homing_state = HomingState::INIT_RAISING;
-        break;
-
-    case HomingState::INIT_RAISING:
-        if (!is_running) {
-            vTaskDelay(pdMS_TO_TICKS(300));
-            stepper.setRunMode(KEEP_SPEED);
-            motor.setSpeed(abs(Z_MOTOR_PRIMARY_HOMING_SPEED) * -1);
-
-            homing_state = HomingState::FAST_DOWN;
-        }
-        break;
-
-    case HomingState::FAST_DOWN:
-        if (end.triggered) {
-            stepper.brake();
+        case HomingState::HOMING_NONE:
             stepper.setRunMode(FOLLOW_POS);
             motor.setMaxSpeed(Z_MOTOR_PRIMARY_HOMING_SPEED);
             motor.setTarget(Z_MOTOR_RISING_HEIGHT, RELATIVE);
 
-            homing_state = HomingState::RAISING;
-        }
-        break;
+            homing_state = HomingState::INIT_RAISING;
+            break;
 
-    case HomingState::RAISING:
-        if (!is_running) {
-            vTaskDelay(pdMS_TO_TICKS(300));
-            stepper.setRunMode(KEEP_SPEED);
-            motor.setSpeed(abs(Z_MOTOR_SECONDARY_HOMING_SPEED) * -1);
+        case HomingState::INIT_RAISING:
+            if (!is_running) {
+                vTaskDelay(pdMS_TO_TICKS(300));
+                stepper.setRunMode(KEEP_SPEED);
+                motor.setSpeed(abs(Z_MOTOR_PRIMARY_HOMING_SPEED) * -1);
 
-            homing_state = HomingState::SLOW_DOWN;
-        }
-        break;
+                homing_state = HomingState::FAST_DOWN;
+            }
+            break;
 
-    case HomingState::SLOW_DOWN:
-        if (end.triggered) {
-            stepper.brake();
-            stepper.setRunMode(FOLLOW_POS);
-            stepper.reset();
+        case HomingState::FAST_DOWN:
+            if (end.triggered) {
+                stepper.brake();
+                stepper.setRunMode(FOLLOW_POS);
+                motor.setMaxSpeed(Z_MOTOR_PRIMARY_HOMING_SPEED);
+                motor.setTarget(Z_MOTOR_RISING_HEIGHT, RELATIVE);
 
-            homing_state = HomingState::HOMING_NONE;
-            must_be_notified = HOMED;
-            is_homing = false;
-        }
-        break;
+                homing_state = HomingState::RAISING;
+            }
+            break;
+
+        case HomingState::RAISING:
+            if (!is_running) {
+                vTaskDelay(pdMS_TO_TICKS(300));
+                stepper.setRunMode(KEEP_SPEED);
+                motor.setSpeed(abs(Z_MOTOR_SECONDARY_HOMING_SPEED) * -1);
+
+                homing_state = HomingState::SLOW_DOWN;
+            }
+            break;
+
+        case HomingState::SLOW_DOWN:
+            if (end.triggered) {
+                stepper.brake();
+                stepper.setRunMode(FOLLOW_POS);
+                stepper.reset();
+
+                homing_state = HomingState::HOMING_NONE;
+                must_be_notified = HOMED;
+                is_homing = false;
+            }
+            break;
     }
 }
 
 /// @brief Start homing Z axis
-void ZMotor::home() { is_homing = true; }
+void ZMotor::home() {
+    is_homing = true;
+}
 
-void ZMotor::disable() { stepper.disable(); }
+void ZMotor::disable() {
+    stepper.disable();
+}
 
-void ZMotor::enable() { stepper.enable(); }
+void ZMotor::enable() {
+    stepper.enable();
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 ZMotor motor;
 
 /// @brief Infinity motor task
-void motorTask(void *pvParameters) {
+void motorTask(void* pvParameters) {
     (void)pvParameters;
 
     while (true) {
@@ -169,23 +184,23 @@ void motorTask(void *pvParameters) {
 }
 
 void initMotor() {
-    xTaskCreatePinnedToCore(
-        motorTask, "MotorTask", 4096, nullptr, 1, nullptr, 1);
+    motor.disable();
+    xTaskCreatePinnedToCore(motorTask, "MotorTask", 4096, nullptr, 1, nullptr, 1);
 }
 
-MotorTargetTask parseMotorTargetTask(PacketReader *pr) {
+MotorTargetTask parseMotorTargetTask(PacketReader* pr) {
     MotorTargetTask mt;
 
     mt.pos = pr->readDouble();
     mt.speed = pr->readDouble();
     switch (pr->readUInt8()) {
-    case 0:
-        mt.positioning = GS_posType::ABSOLUTE;
-        break;
+        case 0:
+            mt.positioning = GS_posType::ABSOLUTE;
+            break;
 
-    case 1:
-        mt.positioning = GS_posType::RELATIVE;
-        break;
+        case 1:
+            mt.positioning = GS_posType::RELATIVE;
+            break;
     }
 
     return mt;

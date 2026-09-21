@@ -1,6 +1,8 @@
 #include "endstop.h"
+
 #include "config.h"
 #include "driver/gpio.h"
+
 #include <Arduino.h>
 
 bool Endstop::manualUpdate() {
@@ -10,12 +12,14 @@ bool Endstop::manualUpdate() {
 
 Endstop end;
 
-void IRAM_ATTR handleInterrupt() { end.triggered = true; }
+void IRAM_ATTR handleInterrupt() {
+    end.triggered = true;
+}
 
 void initEndstop() {
     pinMode(Z_ENDSTOP_PIN, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(Z_ENDSTOP_PIN), handleInterrupt,
-        Z_ENDSTOP_INVERSE ? FALLING : RISING);
+                    Z_ENDSTOP_INVERSE ? FALLING : RISING);
 
     pinMode(Z_ENDSTOP_POWER_PIN, OUTPUT);
     digitalWrite(Z_ENDSTOP_POWER_PIN, 1);
