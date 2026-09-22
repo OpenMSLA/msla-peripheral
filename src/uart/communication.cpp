@@ -88,6 +88,10 @@ void communicationTask(void* pvParameters) {
                 case 60:
                     // <ENABLE STEPPER>
                     break;
+
+                case 62:
+                    // <GET STEPPER POS>
+                    break;
                 default:
                     continue;
             }

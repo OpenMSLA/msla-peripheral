@@ -16,3 +16,7 @@ void executeUVTask(UVTask uv);
 
 /// Initialize UV light
 void initUV();
+
+/// @brief Get current uv state
+/// @return UV state
+bool getUVState();

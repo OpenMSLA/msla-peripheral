@@ -16,6 +16,7 @@ void setup() {
 void loop() {
     CommunicationStruct cs;
     if (receiveQueue(&cs)) {
+        PacketWriter pw;
         switch (cs.field_id) {
             // UV command
             case 40: {
@@ -33,11 +34,10 @@ void loop() {
             case 52: {
                 motor.setCurrent(cs.u.current);
 
-                PacketWriter p;
-                p.write((uint8_t)53);
-                p.write(motor.getCurrent());
+                pw.write((uint8_t)53);
+                pw.write(motor.getCurrent());
 
-                UARTSend(p);
+                UARTSend(pw);
                 break;
             }
 
@@ -54,6 +54,20 @@ void loop() {
             case 60:
                 motor.enable();
                 UARTSend(61);
+                break;
+
+            case 62:
+                // Current motor pos in mm
+                pw.write((uint8_t)63);
+                pw.write(motor.get_motor_pos());
+                UARTSend(pw);
+                break;
+
+            case 64:
+                // Current UV state
+                pw.write((uint8_t)65);
+                pw.write(getUVState());
+                UARTSend(pw);
                 break;
         }
     }

@@ -17,3 +17,7 @@ UVTask parseUVTask(PacketReader* pr) {
 void executeUVTask(UVTask uv) {
     digitalWrite(UV_RELAY_PIN, uv.state);
 }
+
+bool getUVState() {
+    return digitalRead(UV_RELAY_PIN);
+}

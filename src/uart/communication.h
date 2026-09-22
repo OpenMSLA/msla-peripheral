@@ -25,6 +25,8 @@ union CommunicationUnion {
     // <HOME>            // 56
     // <DISABLE STEPPER> // 58
     // <ENABLE STEPPER>  // 60
+
+    // <GET STEPPER POS> // 62
 };
 
 /// @brief Communication command structure containing a command identifier and a payload.

@@ -105,7 +105,7 @@ void ZMotor::tickHome(bool is_running) {
     switch (homing_state) {
         case HomingState::HOMING_NONE:
             stepper.setRunMode(FOLLOW_POS);
-            motor.setMaxSpeed(Z_MOTOR_PRIMARY_HOMING_SPEED);
+            motor.setMaxSpeed(Z_MOTOR_RISING_SPEED);
             motor.setTarget(Z_MOTOR_RISING_HEIGHT, RELATIVE);
 
             homing_state = HomingState::INIT_RAISING;
@@ -125,7 +125,7 @@ void ZMotor::tickHome(bool is_running) {
             if (end.triggered) {
                 stepper.brake();
                 stepper.setRunMode(FOLLOW_POS);
-                motor.setMaxSpeed(Z_MOTOR_PRIMARY_HOMING_SPEED);
+                motor.setMaxSpeed(Z_MOTOR_RISING_SPEED);
                 motor.setTarget(Z_MOTOR_RISING_HEIGHT, RELATIVE);
 
                 homing_state = HomingState::RAISING;
@@ -167,6 +167,10 @@ void ZMotor::disable() {
 
 void ZMotor::enable() {
     stepper.enable();
+}
+
+double ZMotor::get_motor_pos() {
+    return STEPS_TO_MM(stepper.pos);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////

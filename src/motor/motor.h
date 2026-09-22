@@ -81,6 +81,10 @@ public:
     /// @brief Enable stepper
     void enable();
 
+    /// @brief Get current motor pos in mm
+    /// @return Motor pos in mm
+    double get_motor_pos();
+
 private:
     /// @brief Z-motor driver preferences
     TMC2208Stepper driver{&Serial2, TMC2208_R_SENSE};

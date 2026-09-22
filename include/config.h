@@ -24,20 +24,25 @@
 #define DEFAULT_STEPPER_MICROSTEP 256
 
 /// Total steps per revolution
-#define TOTAL_STEPPER_STEPS STEPPER_STEPS *DEFAULT_STEPPER_MICROSTEP
+#define TOTAL_STEPPER_STEPS STEPPER_STEPS* DEFAULT_STEPPER_MICROSTEP
 
 /// Drive screw thread pitch (mm/rev)
 #define Z_MOTOR_LEADSCREW_STEP 8
 
-#define MM_TO_STEPS(x) (((x) * TOTAL_STEPPER_STEPS) / Z_MOTOR_LEADSCREW_STEP)
-#define STEPS_TO_MM(x) (((x) * Z_MOTOR_LEADSCREW_STEP) / TOTAL_STEPPER_STEPS)
+#define MM_TO_STEPS(x)                                                                             \
+    (((double)(x) * (double)(TOTAL_STEPPER_STEPS)) / (double)(Z_MOTOR_LEADSCREW_STEP))
+#define STEPS_TO_MM(x)                                                                             \
+    ((double)(x) * (double)(Z_MOTOR_LEADSCREW_STEP) / (double)(TOTAL_STEPPER_STEPS))
 
 /// Default Z-motor accel (mm/s2)
 #define Z_MOTOR_ACCEL 10
 /// Primary speed at which the motor will reach the limit switch (mm/min)
 #define Z_MOTOR_PRIMARY_HOMING_SPEED 150
-/// Speed ​​of precise aiming to the limit switch(mm/min)
+/// Speed ​​of precise aiming to the limit switch (mm/min)
 #define Z_MOTOR_SECONDARY_HOMING_SPEED 60
+
+/// Speed of the motor rising (mm/min)
+#define Z_MOTOR_RISING_SPEED 45
 /// The height to which the motor rises when homing (mm)
 #define Z_MOTOR_RISING_HEIGHT 3
 
