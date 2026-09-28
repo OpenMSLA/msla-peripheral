@@ -27,6 +27,9 @@ union CommunicationUnion {
     // <ENABLE STEPPER>  // 60
 
     // <GET STEPPER POS> // 62
+
+    // System fan control
+    u_int8_t sys_fan_power; // 70
 };
 
 /// @brief Communication command structure containing a command identifier and a payload.

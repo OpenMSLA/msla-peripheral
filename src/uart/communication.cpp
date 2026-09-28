@@ -92,6 +92,10 @@ void communicationTask(void* pvParameters) {
                 case 62:
                     // <GET STEPPER POS>
                     break;
+
+                case 70:
+                    commStruct.u.sys_fan_power = pr.readUInt8();
+                    break;
                 default:
                     continue;
             }

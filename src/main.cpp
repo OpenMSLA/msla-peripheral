@@ -11,6 +11,9 @@ void setup() {
     initEndstop();
     initMotor();
     initUV();
+
+    ledcSetup(0, SYSTEM_FAN_FREQ, 8);
+    ledcAttachPin(SYSTEM_FAN_PIN, 0);
 }
 
 void loop() {
@@ -68,6 +71,13 @@ void loop() {
                 pw.write((uint8_t)65);
                 pw.write(getUVState());
                 UARTSend(pw);
+                break;
+
+            case 70:
+                // Set sys fan speed
+                ledcWrite(0, cs.u.sys_fan_power);
+                // Dont send reply, cuz we don't need :)
+                // UARTSend((uint8_t)71);
                 break;
         }
     }

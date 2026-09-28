@@ -66,7 +66,7 @@
 #define ORCHESTRATOR_SERIAL_BAUD_RATE 115200
 
 /// Use hardware serial for orchestrator connectivity
-#define ORCHESTRATOR_HARDWARE_SERIAL
+// #define ORCHESTRATOR_HARDWARE_SERIAL
 
 #ifdef ORCHESTRATOR_HARDWARE_SERIAL
 /// Physical serial ID
@@ -75,3 +75,9 @@
 #define ORCHESTRATOR_RX_PIN 26
 #define ORCHESTRATOR_TX_PIN 25
 #endif
+
+// System fan connection pin (PWM)
+#define SYSTEM_FAN_PIN 25
+
+// System fan pwm freq
+#define SYSTEM_FAN_FREQ 30
