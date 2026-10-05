@@ -79,4 +79,10 @@ public:
     std::vector<uint8_t> getPacket() {
         return data;
     }
+
+    void erase() {
+        data.clear();
+        pos = 0;
+        size = 0;
+    }
 };

@@ -20,6 +20,8 @@ void loop() {
     CommunicationStruct cs;
     if (receiveQueue(&cs)) {
         PacketWriter pw;
+        pw.erase();
+
         switch (cs.field_id) {
             // UV command
             case 40: {
@@ -60,16 +62,10 @@ void loop() {
                 break;
 
             case 62:
-                // Current motor pos in mm
+                // Current physical state
                 pw.write((uint8_t)63);
+                pw.write((uint8_t)getUVState());
                 pw.write(motor.get_motor_pos());
-                UARTSend(pw);
-                break;
-
-            case 64:
-                // Current UV state
-                pw.write((uint8_t)65);
-                pw.write(getUVState());
                 UARTSend(pw);
                 break;
 
