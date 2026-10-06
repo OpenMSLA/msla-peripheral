@@ -1,0 +1,24 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build and Upload",
+            "detail": "Build and Upload",
+            "type": "shell",
+            "command": "./dep.ps1",
+            "args": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "runOptions": {
+                "reevaluateOnRerun": true
+            },
+            "options": {
+                "statusbar": {
+                    "label": "$(debug-start) Upload"
+                }
+            }
+        }
+    ]
+}

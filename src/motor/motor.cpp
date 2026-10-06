@@ -211,6 +211,8 @@ MotorTargetTask parseMotorTargetTask(PacketReader* pr) {
 }
 
 void executeMotorTargetTask(MotorTargetTask mt) {
+    motor.last_tick_run_state = true;
+
     motor.enable();
     motor.is_homing = false;
     motor.setTarget(mt.pos, mt.positioning);

@@ -60,7 +60,7 @@
 #define Z_ENDSTOP_INVERSE true
 
 /// z-dimension of printing space (mm)
-#define Z_HEIGHT 185
+#define Z_HEIGHT 165
 
 /// Baud rate used for orchestrator connectivity
 #define ORCHESTRATOR_SERIAL_BAUD_RATE 115200
