@@ -29,11 +29,9 @@ void startCommunication() {
 
 void communicationTask(void* pvParameters) {
     while (1) {
-        xSemaphoreTake(uartMutex, portMAX_DELAY);
         while (OrchestratorSerial.available()) {
             UART_BUFFER.push_back(OrchestratorSerial.read());
         }
-        xSemaphoreGive(uartMutex);
 
         /// Notify the orchestrator when the motor has reached the target point
         /// or failed
