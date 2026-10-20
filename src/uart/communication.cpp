@@ -28,6 +28,9 @@ void startCommunication() {
 }
 
 void communicationTask(void* pvParameters) {
+    (void)pvParameters;
+    PacketReader pr;
+
     while (1) {
         while (OrchestratorSerial.available()) {
             UART_BUFFER.push_back(OrchestratorSerial.read());
@@ -54,7 +57,6 @@ void communicationTask(void* pvParameters) {
             UARTSend(pw);
         }
 
-        PacketReader pr;
         while (pr.parse()) {
             u_int8_t cmd = pr.readUInt8();
 

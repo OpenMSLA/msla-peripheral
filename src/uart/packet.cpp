@@ -49,6 +49,7 @@ bool PacketReader::parse() {
         return false;
 
     this->data.clear();
+    this->pos = 0;
     size_t pos = SYNC_LEN + len_len;
     while (pos < total - 1) {
         this->data.push_back(UART_BUFFER[pos++]);
